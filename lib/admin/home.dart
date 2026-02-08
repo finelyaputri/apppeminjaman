@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:app_peminjaman/auth/logout.dart';
+import 'read_alat.dart';
+import 'read_user.dart';
 
 class HomeDashboardAdmin extends StatefulWidget {
   const HomeDashboardAdmin({super.key});
@@ -9,6 +11,7 @@ class HomeDashboardAdmin extends StatefulWidget {
 }
 
 class _HomeDashboardAdminState extends State<HomeDashboardAdmin> {
+  int _currentIndex = 0;
 
   // ============================
   // 🔧 PERBAIKAN (HANYA INI)
@@ -150,27 +153,57 @@ class _HomeDashboardAdminState extends State<HomeDashboardAdmin> {
       /// BOTTOM NAV
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
+        currentIndex: _currentIndex,
         selectedItemColor: Colors.grey[800],
         unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index; // ✅ Update index
+          });
+
+        
+         if (index == 1) {
+            // Navigasi ke halaman Alat
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ReadAlatPage()),
+            );
+          }
+
+          else if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ReadUser()),
+            );
+          }
+
+    else if (index == 4) {
+            // Logout
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const LogoutPage()),
+            );
+          }
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
             label: 'Dashboard',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'User',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.add_box_sharp),
             label: 'Alat',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'User',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
             label: 'Kategori',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.history),
+            icon: Icon(Icons.logout),
             label: 'Logout',
           ),
         ],

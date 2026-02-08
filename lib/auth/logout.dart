@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; 
+import 'login.dart';
 
 class LogoutPage extends StatelessWidget {
   const LogoutPage({super.key});
@@ -126,28 +128,37 @@ class LogoutPage extends StatelessWidget {
                   // LOGOUT
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        // TODO: tambahkan logika logout
-                        showDialog(
+                      onPressed: () async {
+                        // ✅ Perbaikan: Logout Supabase dan navigasi ke halaman Login
+                        final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (_) => AlertDialog(
                             title: const Text("Logout"),
                             content: const Text("Anda yakin ingin logout?"),
                             actions: [
                               TextButton(
-                                onPressed: () => Navigator.pop(context),
+                                onPressed: () => Navigator.pop(context, false),
                                 child: const Text("Batal"),
-                              ),
+                               ),
                               TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  // arahkan ke login page
-                                },
+                                onPressed: () => Navigator.pop(context, true),
                                 child: const Text("Logout"),
                               ),
                             ],
                           ),
                         );
+
+                        if (confirmed == true) {
+                          await Supabase.instance.client.auth.signOut(); // ✅ Logout
+                          // ✅ Navigasi ke halaman login, hapus semua route sebelumnya
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const LoginScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[600],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../admin/home.dart';
+import '../petugas/home_petugas.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? passwordError;
 
   // ============================
-  // 🔧 PERBAIKAN (HANYA DI SINI)
+  // 🔧 LOGIN (SUDAH DIPERBAIKI)
   // ============================
   Future<void> login() async {
     setState(() {
@@ -34,38 +35,89 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => isLoading = true);
 
     try {
+      // ✅ PERBAIKAN — ambil email & password
+      final email = emailController.text.trim();
+      final password = passwordController.text.trim();
+
+      // ✅ PERBAIKAN — cek dulu email ada di tabel users atau tidak
+      final checkEmail = await Supabase.instance.client
+          .from('users')
+          .select('user_id')
+          .eq('email', email)
+          .maybeSingle();
+
+      if (checkEmail == null) {
+        setState(() {
+          emailError = "Email tidak terdaftar";
+          passwordError = null;
+        });
+        return;
+      }
+
+      // LOGIN AUTH (kode kamu — tetap)
       final response =
           await Supabase.instance.client.auth.signInWithPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
+        email: email,
+        password: password,
       );
 
-      // ✅ LOGIN BERHASIL → MASUK DASHBOARD ADMIN
-      if (response.user != null) {
+      final user = response.user;
+
+      if (user != null) {
         if (!mounted) return;
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const HomeDashboardAdmin(),
-          ),
-        );
-      }
-    } on AuthException catch (e) {
-      final message = e.message.toLowerCase();
+        final userId = user.id;
 
-      // 🔴 EMAIL SALAH / TIDAK TERDAFTAR
-      if (message.contains('email') || message.contains('user not found')) {
-        setState(() {
-          emailError = "Email yang anda masukkan salah";
-        });
+        final userData = await Supabase.instance.client
+            .from('users')
+            .select('role')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        if (userData == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('User tidak ditemukan di database')),
+          );
+          return;
+        }
+
+        final role = userData['role'] as String?;
+
+        if (role == 'admin') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const HomeDashboardAdmin()),
+          );
+        } else if (role == 'petugas') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const HomePetugas()),
+          );
+
+          // ✅ PERBAIKAN — validasi login petugas
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Berhasil login sebagai Petugas')),
+          );
+
+        } else if (role == 'peminjam') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const HomePetugas()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Role pengguna tidak valid')),
+          );
+        }
       }
-      // 🔐 PASSWORD SALAH (TETAP SESUAI VALIDASI AWAL KAMU)
-      else if (message.contains('invalid login credentials')) {
-        setState(() {
-          passwordError = "Kata sandi salah";
-        });
-      }
+
+    // ✅ PERBAIKAN — auth gagal = password salah
+    } on AuthException {
+      setState(() {
+        passwordError = "Kata sandi salah";
+        emailError = null;
+      });
+
     } catch (_) {
       setState(() {
         passwordError = "Gagal terhubung ke server";
@@ -93,7 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                /// EMAIL FIELD
                 TextFormField(
                   controller: emailController,
                   onChanged: (val) {
@@ -120,7 +171,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 20),
 
-                /// PASSWORD FIELD
                 TextFormField(
                   controller: passwordController,
                   obscureText: obscurePassword,
@@ -160,7 +210,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 35),
 
-                /// LOGIN BUTTON
                 SizedBox(
                   width: 160,
                   height: 50,
