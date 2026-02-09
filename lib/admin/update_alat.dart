@@ -29,8 +29,16 @@ class _UpdateAlatPageState extends State<UpdateAlatPage> {
     _namaAlatController = TextEditingController(text: alat?['nama_alat'] ?? '');
     _statusController = TextEditingController(text: alat?['status'] ?? 'Tersedia');
     _stokController = TextEditingController(text: alat?['stok']?.toString() ?? '0');
-    _selectedKategori = alat?['kategori'] ?? 'Sepak Bola';
+
+   if (alat != null) {
+      if (alat['kategori'] != null && alat['kategori'] is Map) {
+         _selectedKategori = alat['kategori']['nama_kategori'] ?? "Sepak Bola";
+      } else {
+         _selectedKategori = alat['nama_kategori'] ?? "Sepak Bola";
+      }
+    }
   }
+    
 
   @override
   void dispose() {
@@ -67,12 +75,16 @@ class _UpdateAlatPageState extends State<UpdateAlatPage> {
         gambarUrl = supabase.storage.from('alat_bucket').getPublicUrl(fileName);
       }
 
+      int kategoriId = 1; // Default Sepak Bola
+      if (_selectedKategori == "Badminton") kategoriId = 3; // Sesuai DB kamu
+      if (_selectedKategori == "Voli") kategoriId = 4;
+
       // Update data di Supabase
       await supabase.from('alat').update({
         'nama_alat': _namaAlatController.text,
         'status': _statusController.text,
         'stok': int.tryParse(_stokController.text) ?? 0,
-        'kategori': _selectedKategori,
+       'kategori_id': kategoriId,
         'gambar': gambarUrl,
       }).eq('alat_id', alatId);
 

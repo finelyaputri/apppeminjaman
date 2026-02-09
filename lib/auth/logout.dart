@@ -9,7 +9,8 @@ class LogoutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
-      body: SafeArea(
+      // ✅ PERBAIKAN: Gunakan SingleChildScrollView agar tidak overflow saat ada navbar
+      body: SingleChildScrollView( 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -92,7 +93,7 @@ class LogoutPage extends StatelessWidget {
               ),
             ),
 
-            const Spacer(),
+            const SizedBox(height: 40),
 
             // ===== BUTTON AREA =====
             Padding(
@@ -208,4 +209,3 @@ class LogoutPage extends StatelessWidget {
     );
   }
 }
-// meperbaiiki kode

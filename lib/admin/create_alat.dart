@@ -56,8 +56,8 @@ Future<void> _simpanAlat() async {
 
     int kategoriId = 0;
     if (_kategori == 'Sepak Bola') kategoriId = 1;
-    if (_kategori == 'Voli') kategoriId = 2;
     if (_kategori == 'Badminton') kategoriId = 3;
+    if (_kategori == 'Voli') kategoriId = 4;
 
     await supabase.from('alat').insert({
       'nama_alat': _namaC.text,
@@ -94,7 +94,6 @@ void dispose() {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xFF756D6D),
-        automaticallyImplyLeading: false,
         title: const Text(
           'Tambah Alat',
           style: TextStyle(

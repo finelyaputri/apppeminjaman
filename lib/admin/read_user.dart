@@ -4,6 +4,11 @@ import 'create_user.dart';
 import 'update_user.dart';
 import 'delete_user.dart';
 
+import 'home.dart';
+import 'read_alat.dart';
+import 'read_kategori.dart';
+import '../auth/logout.dart';
+
 class ReadUser extends StatefulWidget {
   const ReadUser({super.key});
 
@@ -187,6 +192,32 @@ class _ReadUserState extends State<ReadUser> {
               ),
             ),
           ),
+        ],
+      ),
+
+      /// ✅ NAVBAR BARU
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: 2, // Index 2 untuk Halaman User
+        selectedItemColor: Colors.grey[800],
+        unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeDashboardAdmin()));
+          } else if (index == 1) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ReadAlatPage()));
+          } else if (index == 3) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ReadKategori()));
+          } else if (index == 4) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LogoutPage()));
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+          BottomNavigationBarItem(icon: Icon(Icons.add_box_sharp), label: 'Alat'),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'User'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Kategori'),
+          BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Logout'),
         ],
       ),
     );

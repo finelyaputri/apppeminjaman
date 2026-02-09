@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../auth/logout.dart';
 
 class HomePetugas extends StatefulWidget {
   const HomePetugas({super.key});
@@ -207,7 +208,17 @@ class _HomePetugasState extends State<HomePetugas> {
           _buildNavItem(Icons.assignment_outlined, 'Peminjaman'),
           _buildNavItem(Icons.assignment_return_outlined, 'Pengembalian'),
           _buildNavItem(Icons.show_chart, 'Laporan'),
-          _buildNavItem(Icons.logout, 'Logout'),
+
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LogoutPage()),
+              );
+            },
+            child: _buildNavItem(Icons.logout, 'Logout'),
+          ),
+          
         ],
       ),
     );

@@ -4,6 +4,11 @@ import 'create_alat.dart';
 import 'delete_alat.dart';
 import 'update_alat.dart'; 
 
+import 'home.dart';
+import 'read_user.dart';
+import 'read_kategori.dart';
+import '../auth/logout.dart';
+
 class ReadAlatPage extends StatefulWidget {
   const ReadAlatPage({super.key});
 
@@ -12,6 +17,8 @@ class ReadAlatPage extends StatefulWidget {
 }
 
 class _ReadAlatPageState extends State<ReadAlatPage> {
+  int _currentIndex = 1;
+
   Future<List<Map<String, dynamic>>> _getAlat() async {
     final supabase = Supabase.instance.client;
     final res = await supabase.from('alat').select();
@@ -23,6 +30,7 @@ class _ReadAlatPageState extends State<ReadAlatPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF756D6D),
+        automaticallyImplyLeading: false,
         title: const Text('Daftar Alat', style: TextStyle(color: Colors.white)),
       ),
       floatingActionButton: FloatingActionButton(
@@ -60,10 +68,67 @@ class _ReadAlatPageState extends State<ReadAlatPage> {
                 imgPath: pathGambar,
                 id: a['alat_id'], 
                 a: a,
-              );
+             );
             },
           );
         },
+      ),
+
+  /// ✅ BOTTOM NAV (Sama persis dengan home.dart)
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _currentIndex,
+        selectedItemColor: Colors.grey[800],
+        unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const HomeDashboardAdmin()),
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const ReadUser()),
+            );
+          } else if (index == 3) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const ReadKategori()),
+            );
+          } else if (index == 4) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const LogoutPage()),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard),
+            label: 'Dashboard',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_box_sharp),
+            label: 'Alat',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'User',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: 'Kategori',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.logout),
+            label: 'Logout',
+          ),
+        ],
       ),
     );
   }

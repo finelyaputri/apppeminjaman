@@ -3,6 +3,7 @@ import 'package:app_peminjaman/auth/logout.dart';
 import 'read_alat.dart';
 import 'read_user.dart';
 import 'read_kategori.dart';
+import 'log_aktivitas.dart';
 
 class HomeDashboardAdmin extends StatefulWidget {
   const HomeDashboardAdmin({super.key});
@@ -108,8 +109,17 @@ class _HomeDashboardAdminState extends State<HomeDashboardAdmin> {
             const SizedBox(height: 12),
             _menuButton('CRUD Pengembalian'),
             const SizedBox(height: 12),
-            _menuButton('Log Aktivitas'),
 
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LogAktivitas()),
+                  );
+                },
+                child: _menuButton('Log Aktivitas'),
+              ),
+           
             const SizedBox(height: 20),
 
             /// INFO CEPAT

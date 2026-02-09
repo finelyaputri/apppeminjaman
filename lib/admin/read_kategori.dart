@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'create_kategori.dart';
 
+import 'home.dart';
+import 'read_alat.dart';
+import 'read_user.dart';
+import '../auth/logout.dart';
+
 void main() {
   runApp(const MaterialApp(
     home: ReadKategori(),
@@ -134,6 +139,32 @@ class ReadKategori extends StatelessWidget {
             ),
           ],
         ),
+      ),
+
+      /// ✅ NAVBAR BARU
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: 3, // Index 3 untuk Kategori
+        selectedItemColor: Colors.grey[800],
+        unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeDashboardAdmin()));
+          } else if (index == 1) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ReadAlatPage()));
+          } else if (index == 2) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ReadUser()));
+          } else if (index == 4) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LogoutPage()));
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+          BottomNavigationBarItem(icon: Icon(Icons.add_box_sharp), label: 'Alat'),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'User'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Kategori'),
+          BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Logout'),
+        ],
       ),
     );
   }
