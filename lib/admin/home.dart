@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:app_peminjaman/auth/logout.dart';
 import 'read_alat.dart';
 import 'read_user.dart';
+import 'read_kategori.dart';
 
 class HomeDashboardAdmin extends StatefulWidget {
   const HomeDashboardAdmin({super.key});
@@ -174,6 +175,13 @@ class _HomeDashboardAdminState extends State<HomeDashboardAdmin> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const ReadUser()),
+            );
+          }
+
+          else if (index == 3) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ReadKategori()),
             );
           }
 
