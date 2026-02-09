@@ -40,7 +40,20 @@ Future<void> _simpanAlat() async {
   try {
     final supabase = Supabase.instance.client;
 
-    // mapping string dropdown → int
+    // ===== PERBAIKAN UTAMA: Upload gambar jika ada
+    String gambarUrl = 'assets/default.png'; // default jika tidak pilih gambar
+
+    if (_webImage != null) {
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.png';
+      await supabase.storage.from('alat_bucket').uploadBinary(fileName, _webImage!);
+      gambarUrl = supabase.storage.from('alat_bucket').getPublicUrl(fileName);
+    } else {
+      // Kalau masih pakai kategori statis, tetap bisa pilih gambar default
+      if (_kategori == 'Sepak Bola') gambarUrl = 'assets/bola.png';
+      if (_kategori == 'Voli') gambarUrl = 'assets/voli.png';
+      if (_kategori == 'Badminton') gambarUrl = 'assets/raket.png';
+    }
+
     int kategoriId = 0;
     if (_kategori == 'Sepak Bola') kategoriId = 1;
     if (_kategori == 'Voli') kategoriId = 2;
@@ -51,6 +64,7 @@ Future<void> _simpanAlat() async {
       'status': _statusC.text.isEmpty ? 'Tersedia' : _statusC.text,
       'stok': int.tryParse(_stokC.text) ?? 0,
       'kategori_id': kategoriId,
+      'gambar': gambarUrl, // simpan URL gambar dari Storage atau asset
     });
 
     if (!mounted) return;
@@ -58,12 +72,12 @@ Future<void> _simpanAlat() async {
 
   } catch (e) {
     debugPrint("INSERT ERROR: $e");
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Gagal simpan: $e')),
     );
   }
 }
+
 
 //// === PERBAIKAN (aman, tidak ubah struktur UI) ===
 @override
@@ -169,8 +183,11 @@ void dispose() {
                 );
               }).toList(),
               onChanged: (String? newValue) {
-                _kategori = newValue;
+                setState(() {
+                  _kategori = newValue;
+              });
               },
+
             ),
 
             const SizedBox(height: 40),
@@ -196,14 +213,25 @@ void dispose() {
                 //// === PERBAIKAN ===
                 /// TAMBAH → simpan ke Supabase
                 ElevatedButton(
-                  onPressed: _simpanAlat,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF756D6D),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  ),
-                  child: const Text('Tambah Alat', style: TextStyle(color: Colors.white)),
-                ),
+  onPressed: () {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      // Kalau belum login, tampilkan pesan
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Silakan login terlebih dahulu')),
+      );
+      return; // hentikan proses
+    }
+    _simpanAlat(); // Kalau sudah login, lanjut simpan
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color(0xFF756D6D),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+  ),
+  child: const Text('Tambah Alat', style: TextStyle(color: Colors.white)),
+),
+
               ],
             ),
           ],

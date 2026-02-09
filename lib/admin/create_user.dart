@@ -107,7 +107,7 @@ class _CreateUserState extends State<CreateUser> {
         password: password,
         data: {
           'nama': nama,
-          'role': selectedRole, // Sudah kecil dari list roles
+          'role': selectedRole,
         },
       );
 

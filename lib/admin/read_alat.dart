@@ -81,22 +81,31 @@ class _ReadAlatPageState extends State<ReadAlatPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 80,
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: imgPath != null
-                ? Image.asset(
-                    imgPath,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.broken_image, color: Colors.grey);
-                    },
-                  )
-                : const Icon(Icons.inventory),
-          ),
+  width: 80,
+  height: 60,
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(10),
+  ),
+  child: imgPath != null
+      ? (imgPath.startsWith('http')
+          ? Image.network(
+              imgPath,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.broken_image, color: Colors.grey);
+              },
+            )
+          : Image.asset(
+              imgPath,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.broken_image, color: Colors.grey);
+              },
+            ))
+      : const Icon(Icons.inventory),
+),
+
           const SizedBox(width: 16),
           Expanded(
             child: Column(

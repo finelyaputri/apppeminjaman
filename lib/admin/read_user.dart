@@ -57,7 +57,7 @@ class _ReadUserState extends State<ReadUser> {
           // List User dengan StreamBuilder
           Expanded(
             child: StreamBuilder<List<Map<String, dynamic>>>(
-              stream: supabase.from('users').stream(primaryKey: ['id']),
+              stream: supabase.from('users').stream(primaryKey: ['user_id']),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -134,14 +134,18 @@ class _ReadUserState extends State<ReadUser> {
                                 const SizedBox(width: 5),
                                 GestureDetector(
                                   onTap: () {
-                                    // Navigasi ke halaman DeleteUserPage
                                     Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                      builder: (context) => DeleteUserPage(userId: user['id']),
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DeleteUserPage(
+                                      userId: user['user_id'],
+                                      onDeleted: () {
+                                        setState(() {}); // Refresh list setelah delete
+                                      },
                                     ),
-                                  );
-                                },
+                                  ),
+                                );
+                              },
                                 child: Icon(Icons.delete, color: Colors.grey.shade700, size: 25),
                                 ),
                               ],

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DeleteUserPage extends StatefulWidget {
-  final dynamic userId;
+  final String userId; 
+  final VoidCallback? onDeleted;
 
-  const DeleteUserPage({super.key, this.userId});
+ const DeleteUserPage({super.key, required this.userId, this.onDeleted});
 
   @override
   State<DeleteUserPage> createState() => _DeleteUserPageState();
@@ -24,23 +25,25 @@ class _DeleteUserPageState extends State<DeleteUserPage> {
 
   // Fungsi Logika Hapus ke Supabase
   Future<void> _deleteUser() async {
-    try {
-      await supabase.from('users').delete().eq('id', widget.userId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User berhasil dihapus')),
-        );
-        Navigator.pop(context); // Kembali ke ReadUser
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menghapus user: $e')),
-        );
-        Navigator.pop(context); // Kembali jika gagal
-      }
+  try {
+    await supabase.from('users').delete().eq('user_id', widget.userId);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User berhasil dihapus')),
+      );
+      widget.onDeleted?.call(); // <-- panggil callback untuk refresh list
+      Navigator.pop(context); // Tutup DeleteUserPage
+    }
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menghapus user: $e')),
+      );
+      Navigator.pop(context); // Tutup halaman jika gagal
     }
   }
+}
+
 
   void _showDeleteConfirmation(BuildContext context) {
     showDialog(
@@ -49,95 +52,84 @@ class _DeleteUserPageState extends State<DeleteUserPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
+            borderRadius: BorderRadius.circular(15.0),
+            side: const BorderSide(color: Colors.grey, width: 0.5),
           ),
-          contentPadding: EdgeInsets.zero,
+          title: Column(
+            children: [
+              const Text(
+                'Hapus User',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
+                ),
+              ),
+              const Divider(thickness: 1),
+            ],
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey, width: 0.5),
-                  ),
-                ),
-                child: const Text(
-                  'Hapus User',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Color(0xFF616161),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 25),
-              // Ikon Peringatan
-              Container(
-                padding: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF756F6F), width: 3),
-                ),
-                child: const Icon(
-                  Icons.priority_high,
-                  size: 60,
-                  color: Color(0xFF756F6F),
-                ),
+              const Icon(
+                Icons.error_outline,
+                size: 80,
+                color: Colors.grey,
               ),
               const SizedBox(height: 20),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  'Apakah Anda yakin ingin menghapus user ini?',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15, color: Color(0xFF756F6F)),
-                ),
-              ),
-              const SizedBox(height: 30),
-              // Tombol Aksi
-              Padding(
-                padding: const EdgeInsets.only(right: 20, bottom: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    SizedBox(
-                      width: 80,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context); // Tutup Dialog
-                          _deleteUser(); // Jalankan fungsi hapus
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF756F6F),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: const Text('Iya', style: TextStyle(color: Colors.white)),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    SizedBox(
-                      width: 80,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.pop(context); // Tutup Dialog
-                          Navigator.pop(context); // Kembali ke ReadUser
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.grey),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: const Text('Batal', style: TextStyle(color: Color(0xFF756F6F))),
-                      ),
-                    ),
-                  ],
+              const Text(
+                'Apakah Anda yakin ingin menghapus user ini?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
                 ),
               ),
             ],
           ),
+          actionsPadding: const EdgeInsets.only(bottom: 20, right: 20),
+          actions: <Widget>[
+            SizedBox(
+              width: 70,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF756D6D),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                ),
+                onPressed: () async {
+                  Navigator.of(context).pop(); // Tutup dialog terlebih dahulu
+                  await _deleteUser(); // Jalankan fungsi hapus
+                },
+                child: const Text(
+                  'Iya',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 70,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.grey),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Hanya tutup dialog tanpa aksi
+                  Navigator.pop(context); // Kembali ke ReadUser
+                },
+                child: const Text(
+                  'Batal',
+                  style: TextStyle(color: Colors.black54),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );

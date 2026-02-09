@@ -14,8 +14,8 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
   late TextEditingController _passwordController;
   
   // 1. Definisikan list opsi role agar konsisten
-  final List<String> _roleOptions = ['admin', 'user', 'petugas'];
-  String _selectedRole = 'user'; // Nilai default
+  final List<String> _roleOptions = ['admin', 'petugas', 'peminjam'];
+  String _selectedRole = 'admin'; // Nilai default
 
   @override
   void initState() {
@@ -26,7 +26,7 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
 
     // 2. PEMBENARAN: Validasi role dari database
     // Mengonversi ke lowercase untuk menghindari kesalahan case-sensitive
-    String roleFromDb = (widget.user['role'] ?? 'user').toString().toLowerCase();
+    String roleFromDb = (widget.user['role'] ?? 'petugas').toString().toLowerCase();
 
     if (_roleOptions.contains(roleFromDb)) {
       _selectedRole = roleFromDb;

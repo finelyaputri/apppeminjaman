@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:typed_data';
+import 'package:image_picker/image_picker.dart';
 
 class UpdateAlatPage extends StatefulWidget {
   final Map<String, dynamic>? alat; // Menerima data alat jika ada
@@ -10,25 +13,92 @@ class UpdateAlatPage extends StatefulWidget {
 }
 
 class _UpdateAlatPageState extends State<UpdateAlatPage> {
-  // Controller untuk input teks
-  final TextEditingController _namaAlatController =
-      TextEditingController(text: "Bola Sepak");
-  final TextEditingController _statusController =
-      TextEditingController(text: "Tersedia");
-  final TextEditingController _stokController =
-      TextEditingController(text: "10");
-  
+  late TextEditingController _namaAlatController;
+  late TextEditingController _statusController;
+  late TextEditingController _stokController;
   String _selectedKategori = "Sepak Bola";
-  final List<String> _kategoriList = ["Sepak Bola", "Basket", "Voli", "Tenis"];
+  Uint8List? _webImage; // Untuk menyimpan image baru
 
-  // Warna abu-abu gelap sesuai header gambar
+  final List<String> _kategoriList = ["Sepak Bola", "Badminton", "Voli"];
   final Color _headerColor = const Color(0xFF756F6F);
 
   @override
+  void initState() {
+    super.initState();
+    final alat = widget.alat;
+    _namaAlatController = TextEditingController(text: alat?['nama_alat'] ?? '');
+    _statusController = TextEditingController(text: alat?['status'] ?? 'Tersedia');
+    _stokController = TextEditingController(text: alat?['stok']?.toString() ?? '0');
+    _selectedKategori = alat?['kategori'] ?? 'Sepak Bola';
+  }
+
+  @override
+  void dispose() {
+    _namaAlatController.dispose();
+    _statusController.dispose();
+    _stokController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final f = await pickedFile.readAsBytes();
+      setState(() {
+        _webImage = f;
+      });
+    }
+  }
+
+  Future<void> _updateAlat() async {
+    final supabase = Supabase.instance.client;
+    final alatId = widget.alat?['alat_id'];
+    if (alatId == null) return;
+
+    String gambarUrl = widget.alat?['gambar'] ?? 'assets/default.png';
+
+    try {
+      // Upload gambar baru jika ada
+      if (_webImage != null) {
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}.png';
+        await supabase.storage.from('alat_bucket').uploadBinary(fileName, _webImage!);
+        gambarUrl = supabase.storage.from('alat_bucket').getPublicUrl(fileName);
+      }
+
+      // Update data di Supabase
+      await supabase.from('alat').update({
+        'nama_alat': _namaAlatController.text,
+        'status': _statusController.text,
+        'stok': int.tryParse(_stokController.text) ?? 0,
+        'kategori': _selectedKategori,
+        'gambar': gambarUrl,
+      }).eq('alat_id', alatId);
+
+      if (!mounted) return;
+      Navigator.pop(context, true); // Kirim signal ke ReadAlatPage untuk refresh
+    } catch (e) {
+      debugPrint("Error update: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal update: $e')),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    String currentImage = _webImage != null
+        ? '' // Akan ditampilkan Image.memory nanti
+        : widget.alat?['gambar'] ?? 'assets/default.png';
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: const Text(
           'Update Alat',
           style: TextStyle(
@@ -38,94 +108,41 @@ class _UpdateAlatPageState extends State<UpdateAlatPage> {
           ),
         ),
         backgroundColor: _headerColor,
-        elevation: 0,
-        automaticallyImplyLeading: false, // Menghilangkan tombol back default
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Label Foto Produk
-            const Text(
-              'Foto Produk',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF616161),
-              ),
-            ),
+            const Text('Foto Produk', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF616161))),
             const SizedBox(height: 10),
-            
-            // Container Foto Produk dengan Icon Edit
             Center(
-              child: Container(
-                width: double.infinity,
-                height: 150,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey.shade400),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    // Gambar Produk (Bola)
-                    Center(
-                      child: Image.network(
-                        'https://cdn-icons-png.flaticon.com/512/53/53254.png', // Placeholder bola
-                        height: 80,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    // Icon Edit di Pojok Kanan Atas
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: GestureDetector(
-                        onTap: () {
-                          // Logika ganti foto
-                        },
-                        child: Icon(
-                          Icons.edit_note,
-                          color: _headerColor,
-                          size: 35,
-                        ),
-                      ),
-                    ),
-                  ],
+              child: GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  width: double.infinity,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey.shade400),
+                  ),
+                  child: _webImage != null
+                      ? Image.memory(_webImage!, fit: BoxFit.contain)
+                      : (currentImage.startsWith('http')
+                          ? Image.network(currentImage, fit: BoxFit.contain)
+                          : Image.asset(currentImage, fit: BoxFit.contain)),
                 ),
               ),
             ),
             const SizedBox(height: 25),
-
-            // Input Nama Alat
             _buildInputField("Nama Alat", _namaAlatController),
             const SizedBox(height: 20),
-
-            // Input Status
             _buildInputField("Status", _statusController),
             const SizedBox(height: 20),
-
-            // Input Stok
             _buildInputField("Stok", _stokController, isNumber: true),
             const SizedBox(height: 20),
-
-            // Dropdown Kategori
-            const Text(
-              'Kategori',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF616161),
-              ),
-            ),
+            const Text('Kategori', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF616161))),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -153,88 +170,54 @@ class _UpdateAlatPageState extends State<UpdateAlatPage> {
                 ),
               ),
             ),
-            
-            const SizedBox(height: 100), // Memberi ruang untuk tombol bawah
-
-            // Baris Tombol Batal & Simpan
+            const SizedBox(height: 100),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Tombol Batal
                 SizedBox(
                   width: 100,
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.grey),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    child: const Text(
-                      'Batal',
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
-                    ),
+                    child: const Text('Batal', style: TextStyle(color: Colors.grey, fontSize: 16)),
                   ),
                 ),
                 const SizedBox(width: 20),
-                // Tombol Simpan Perubahan
                 SizedBox(
                   width: 180,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Logika update ke database
-                    },
+                    onPressed: _updateAlat,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _headerColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    child: const Text(
-                      'Simpan Perubahan',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
+                    child: const Text('Simpan Perubahan', style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  // Widget Helper untuk Label + TextField
   Widget _buildInputField(String label, TextEditingController controller, {bool isNumber = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF616161),
-          ),
-        ),
+        Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF616161))),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
           keyboardType: isNumber ? TextInputType.number : TextInputType.text,
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade400),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade400),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade400)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade400)),
             hintStyle: const TextStyle(color: Colors.grey),
           ),
           style: const TextStyle(color: Colors.grey),
