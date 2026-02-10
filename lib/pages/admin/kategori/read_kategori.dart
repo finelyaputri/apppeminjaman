@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'create_kategori.dart';
 
-import 'home.dart';
-import 'alat/read_alat.dart';
-import 'read_user.dart';
-import '../../auth/logout.dart';
+import '../home.dart';
+import '../alat/read_alat.dart';
+import '../user/read_user.dart';
+import '../../../auth/logout.dart';
 import 'update_kategori.dart';
 import 'delete_kategori.dart';
 

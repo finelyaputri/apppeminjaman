@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
-import '../../../models/alat_model.dart';
+import '../../../../models/alat_model.dart';
 
 class UpdateAlatPage extends StatefulWidget {
   final Alat alat; // UBAH: Dari Map? ke Alat

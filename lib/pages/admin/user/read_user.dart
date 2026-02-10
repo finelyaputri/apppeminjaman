@@ -4,10 +4,10 @@ import 'create_user.dart';
 import 'update_user.dart';
 import 'delete_user.dart';
 
-import 'home.dart';
-import 'alat/read_alat.dart';
-import 'read_kategori.dart';
-import '../../auth/logout.dart';
+import '../home.dart';
+import '../alat/read_alat.dart';
+import '../kategori/read_kategori.dart';
+import '../../../auth/logout.dart';
 
 class ReadUser extends StatefulWidget {
   const ReadUser({super.key});
@@ -18,6 +18,15 @@ class ReadUser extends StatefulWidget {
 
 class _ReadUserState extends State<ReadUser> {
   final supabase = Supabase.instance.client;
+
+  late final Stream<List<Map<String, dynamic>>> _userStream;
+
+  @override
+  void initState() {
+    super.initState();
+    // 2. WAJIB Inisialisasi stream di sini agar tidak error 'LateInitializationError'
+    _userStream = supabase.from('users').stream(primaryKey: ['user_id']);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +72,14 @@ class _ReadUserState extends State<ReadUser> {
           // List User dengan StreamBuilder
           Expanded(
             child: StreamBuilder<List<Map<String, dynamic>>>(
-              stream: supabase.from('users').stream(primaryKey: ['user_id']),
+              stream: _userStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text("Terjadi kesalahan: ${snapshot.error}"));
                 }
                 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -80,6 +93,10 @@ class _ReadUserState extends State<ReadUser> {
                   itemCount: users.length,
                   itemBuilder: (context, index) {
                     final user = users[index];
+                    // Logika Inisial Otomatis (Mengambil huruf pertama dari nama)
+                    final String nama = user['nama'] ?? 'User';
+                    final String initial = nama.isNotEmpty ? nama[0].toUpperCase() : '?';
+
                     return Container(
                       margin: const EdgeInsets.only(bottom: 15),
                       decoration: BoxDecoration(
@@ -103,7 +120,7 @@ class _ReadUserState extends State<ReadUser> {
                               radius: 35,
                               backgroundColor: const Color(0xFFEBE5E5),
                               child: Text(
-                                user['initial'] ?? '',
+                                initial, // Menggunakan inisial otomatis
                                 style: const TextStyle(
                                   fontSize: 35,
                                   color: Colors.black,
@@ -144,7 +161,7 @@ class _ReadUserState extends State<ReadUser> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => DeleteUserPage(
-                                      userId: user['user_id'],
+                                      userId: user['user_id'].toString(),
                                       onDeleted: () {
                                         setState(() {}); // Refresh list setelah delete
                                       },
@@ -203,15 +220,15 @@ class _ReadUserState extends State<ReadUser> {
         selectedItemColor: Colors.grey[800],
         unselectedItemColor: Colors.grey,
         onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeDashboardAdmin()));
-          } else if (index == 1) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ReadAlatPage()));
-          } else if (index == 3) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ReadKategori()));
-          } else if (index == 4) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LogoutPage()));
-          }
+          if (index == 2) return; // Jangan refresh jika menekan tab yang sama
+          Widget target;
+          if (index == 0) target = const HomeDashboardAdmin();
+          else if (index == 1) target = const ReadAlatPage();
+          else if (index == 3) target = const ReadKategori();
+          else if (index == 4) target = const LogoutPage();
+          else return;
+
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => target));
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),

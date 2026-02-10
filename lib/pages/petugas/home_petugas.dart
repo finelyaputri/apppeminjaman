@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../auth/logout.dart';
+import '../../auth/logout.dart';
 
 class HomePetugas extends StatefulWidget {
   const HomePetugas({super.key});

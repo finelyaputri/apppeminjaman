@@ -4,9 +4,9 @@ import '../../../services/alat_service.dart';
 import 'create_alat.dart';
 import 'delete_alat.dart';
 import 'update_alat.dart'; 
-import '../../admin/home.dart';
-import '../read_user.dart';
-import '../read_kategori.dart';
+import '../home.dart';
+import '../user/read_user.dart';
+import '../kategori/read_kategori.dart';
 import '../../../auth/logout.dart';
 
 class ReadAlatPage extends StatefulWidget {

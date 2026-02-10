@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:app_peminjaman/auth/logout.dart';
 import 'alat/read_alat.dart';
-import 'read_user.dart';
-import 'read_kategori.dart';
+import 'user/read_user.dart';
+import 'kategori/read_kategori.dart';
 import 'log_aktivitas.dart';
 import 'crud_peminjaman.dart';
 

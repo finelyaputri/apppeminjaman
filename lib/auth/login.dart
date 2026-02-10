@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../pages/admin/home.dart';
-import '../petugas/home_petugas.dart';
+import '../pages/petugas/home_petugas.dart';
+import '../pages/peminjam/home_peminjam.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -105,8 +106,13 @@ class _LoginScreenState extends State<LoginScreen> {
         } else if (role == 'peminjam') {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => const HomePetugas()),
+            MaterialPageRoute(builder: (_) => const HomePeminjam()),
           );
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Berhasil login sebagai Peminjam')),
+          );
+
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Role pengguna tidak valid')),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; 
 import 'login.dart';
+import '../pages/peminjam/home_peminjam.dart';
 
 class LogoutPage extends StatefulWidget {
   const LogoutPage({super.key});
@@ -143,7 +144,10 @@ class _LogoutPageState extends State<LogoutPage> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const HomePeminjam()),
+                        );
                       },
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
