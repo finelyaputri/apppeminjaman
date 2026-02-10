@@ -84,10 +84,13 @@ class _LoginScreenState extends State<LoginScreen> {
         final role = userData['role'] as String?;
 
         if (role == 'admin') {
+          // ✅ PERBAIKAN — beri tanda justLoggedIn: true
           Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HomeDashboardAdmin()),
-          );
+          context,
+          MaterialPageRoute(
+            builder: (_) => const HomeDashboardAdmin(justLoggedIn: true),
+          ),
+        );
         } else if (role == 'petugas') {
           Navigator.pushReplacement(
             context,

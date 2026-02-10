@@ -4,9 +4,12 @@ import 'read_alat.dart';
 import 'read_user.dart';
 import 'read_kategori.dart';
 import 'log_aktivitas.dart';
+import 'crud_peminjaman.dart';
 
 class HomeDashboardAdmin extends StatefulWidget {
-  const HomeDashboardAdmin({super.key});
+  final bool justLoggedIn; // ✅ perbaikan: menandai baru login
+
+  const HomeDashboardAdmin({super.key, this.justLoggedIn = false}); // default false
 
   @override
   State<HomeDashboardAdmin> createState() => _HomeDashboardAdminState();
@@ -16,23 +19,25 @@ class _HomeDashboardAdminState extends State<HomeDashboardAdmin> {
   int _currentIndex = 0;
 
   // ============================
-  // 🔧 PERBAIKAN (HANYA INI)
+  // 🔧 PERBAIKAN initState SnackBar
   // ============================
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Berhasil login sebagai admin',
-            textAlign: TextAlign.center,
+    if (widget.justLoggedIn) { // ✅ hanya tampilkan jika baru login
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Berhasil login sebagai admin',
+              textAlign: TextAlign.center,
+            ),
+            behavior: SnackBarBehavior.floating,
           ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    });
+        );
+      });
+    }
   }
 
   @override
@@ -47,6 +52,7 @@ class _HomeDashboardAdminState extends State<HomeDashboardAdmin> {
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: false,
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -105,7 +111,15 @@ class _HomeDashboardAdminState extends State<HomeDashboardAdmin> {
             const SizedBox(height: 20),
 
             /// MENU
-            _menuButton('CRUD Data Peminjaman'),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CrudPeminjamanPage()),
+                );
+              },
+              child: _menuButton('CRUD Data Peminjaman'),
+    ),
             const SizedBox(height: 12),
             _menuButton('CRUD Pengembalian'),
             const SizedBox(height: 12),

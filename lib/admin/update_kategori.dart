@@ -2,33 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 
-class CreateKategori extends StatefulWidget {
-  const CreateKategori({super.key});
+class UpdateKategori extends StatefulWidget {
+  final Map<String, dynamic> kategori;
+
+  const UpdateKategori({
+    super.key,
+    required this.kategori,
+  });
+
 
   @override
-  State<CreateKategori> createState() => _CreateKategoriState();
+  State<UpdateKategori> createState() => _UpdateKategoriState();
 }
 
-class _CreateKategoriState extends State<CreateKategori> {
+class _UpdateKategoriState extends State<UpdateKategori> {
 
-  /// ✅ PERBAIKAN — CONTROLLER
+  // controller tetap ada untuk isi field
   final TextEditingController namaController = TextEditingController();
 
-  /// ✅ PERBAIKAN — FUNGSI INSERT SUPABASE
-  Future<void> tambahKategori() async {
-    final nama = namaController.text.trim();
-
-    if (nama.isEmpty) return;
-
-    await Supabase.instance.client
-        .from('kategori')   // ← nama tabel supabase
-        .insert({
-          'nama_kategori': nama, // ← nama kolom supabase
-        });
-
-    /// ✅ kirim balik data ke halaman sebelumnya
-    Navigator.pop(context, nama);
-  }
+  @override
+void initState() {
+  super.initState();
+  namaController.text = widget.kategori['nama_kategori']?.toString() ?? '';
+}
 
 
   @override
@@ -37,7 +33,7 @@ class _CreateKategoriState extends State<CreateKategori> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
-          'Tambah Kategori Baru',
+          'Update Kategori',
           style: TextStyle(
             color: Colors.white,
             fontSize: 16,
@@ -45,7 +41,7 @@ class _CreateKategoriState extends State<CreateKategori> {
           ),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: const Color(0xFF756D6D), // Warna abu-abu header sesuai gambar
+        backgroundColor: const Color(0xFF756D6D),
         elevation: 0,
       ),
       body: Padding(
@@ -53,6 +49,7 @@ class _CreateKategoriState extends State<CreateKategori> {
         child: Column(
           children: [
             const SizedBox(height: 20),
+
             // Card Utama
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
@@ -68,9 +65,11 @@ class _CreateKategoriState extends State<CreateKategori> {
                   ),
                 ],
               ),
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
                   const Text(
                     'Nama Kategori',
                     style: TextStyle(
@@ -79,14 +78,17 @@ class _CreateKategoriState extends State<CreateKategori> {
                       color: Color(0xFF756D6D),
                     ),
                   ),
+
                   const SizedBox(height: 10),
+
                   // Input Field
                   TextField(
                     controller: namaController,
                     decoration: InputDecoration(
-                      hintText: 'Masukkan Nama Kategori',
+                      hintText: 'Masukkan Nama Kategori Baru',
                       hintStyle: const TextStyle(color: Colors.grey),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 15),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: const BorderSide(color: Colors.grey),
@@ -97,13 +99,35 @@ class _CreateKategoriState extends State<CreateKategori> {
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 40),
-                  // Tombol Tambah Kategori
+
+                  // Tombol Update
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: tambahKategori,
+                      onPressed: () async {
+                        final namaBaru = namaController.text.trim();
+
+                        if (namaBaru.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Nama kategori tidak boleh kosong')),
+                            );
+                            return;
+                          }
+
+                          await Supabase.instance.client
+                            .from('kategori')
+                            .update({
+                              'nama_kategori': namaBaru,
+                            })
+                            .eq('kategori_id', widget.kategori['kategori_id']); // ← pakai id kategori
+
+                            // kembali ke halaman read + kirim sinyal berhasil
+                            Navigator.pop(context, true);
+                          },
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF756D6D),
                         shape: RoundedRectangleBorder(
@@ -112,12 +136,15 @@ class _CreateKategoriState extends State<CreateKategori> {
                         elevation: 0,
                       ),
                       child: const Text(
-                        'Tambah Kategori',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                        'Update Kategori',
+                        style:
+                            TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 20),
+
                   // Tombol Batal
                   SizedBox(
                     width: double.infinity,
@@ -134,7 +161,8 @@ class _CreateKategoriState extends State<CreateKategori> {
                       ),
                       child: const Text(
                         'Batal',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                        style:
+                            TextStyle(color: Colors.grey, fontSize: 16),
                       ),
                     ),
                   ),

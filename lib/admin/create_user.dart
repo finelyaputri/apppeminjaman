@@ -105,18 +105,24 @@ class _CreateUserState extends State<CreateUser> {
       final res = await Supabase.instance.client.auth.signUp(
         email: email,
         password: password,
-        data: {
-          'nama': nama,
-          'role': selectedRole,
-        },
+        data: {}, // kosongkan agar role tidak default
       );
 
-      if (res.user != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User berhasil ditambahkan!')),
-        );
-        Navigator.pop(context); // Kembali ke ReadUser
+      if (res.user != null) {
+        // Simpan nama & role ke tabel users
+        await Supabase.instance.client
+            .from('users')
+            .update({'nama': nama, 'role': selectedRole})
+            .eq('user_id', res.user!.id); // pastikan 'id' sesuai pk tabel users
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('User berhasil ditambahkan!')),
+          );
+          Navigator.pop(context); // kembali ke ReadUser
+        }
       }
+
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

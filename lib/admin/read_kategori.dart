@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'create_kategori.dart';
 
 import 'home.dart';
 import 'read_alat.dart';
 import 'read_user.dart';
 import '../auth/logout.dart';
+import 'update_kategori.dart';
+import 'delete_kategori.dart';
+
 
 void main() {
   runApp(const MaterialApp(
@@ -13,14 +17,38 @@ void main() {
   ));
 }
 
-class ReadKategori extends StatelessWidget {
+class ReadKategori extends StatefulWidget {
   const ReadKategori({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Data dummy kategori
-    final List<String> kategoriList = ['Sepak Bola', 'Badminton', 'Voli'];
+  State<ReadKategori> createState() => _ReadKategoriState();
+}
 
+class _ReadKategoriState extends State<ReadKategori> {
+  List<Map<String, dynamic>> kategoriList = [];
+
+
+  /// ✅ PERBAIKAN — LOAD DATA SUPABASE
+  Future<void> loadKategori() async {
+    final data = await Supabase.instance.client
+        .from('kategori')
+        .select()
+        .order('nama_kategori');
+
+    setState(() {
+      kategoriList = List<Map<String, dynamic>>.from(data);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadKategori();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -33,6 +61,7 @@ class ReadKategori extends StatelessWidget {
           ),
         ),
         backgroundColor: const Color(0xFF756D6D), // Warna abu-abu header
+        automaticallyImplyLeading: false,
         elevation: 0,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4.0),
@@ -87,7 +116,7 @@ class ReadKategori extends StatelessWidget {
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                       title: Text(
-                        kategoriList[index],
+                        kategoriList[index]['nama_kategori'],
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -95,13 +124,49 @@ class ReadKategori extends StatelessWidget {
                         ),
                       ),
                       trailing: SizedBox(
-                        width: 80,
+                        width: 120,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Icon(Icons.edit_note, color: Colors.grey.shade700, size: 30),
+                            IconButton(
+                              icon: Icon(Icons.edit_note, color: Colors.grey.shade700, size: 30),
+                              onPressed: () async {
+                                final dataKategori = kategoriList[index];
+
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => UpdateKategori(
+                                      kategori: dataKategori,
+                                    ),
+                                  ),
+                               );
+
+                                loadKategori();
+                              },
+                            ),
+
                             const SizedBox(width: 10),
-                            Icon(Icons.delete, color: Colors.grey.shade700, size: 28),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.grey.shade700, size: 28),
+                              onPressed: () async {
+                                final kategoriName = kategoriList[index]['nama_kategori'];
+
+                              // Navigasi ke halaman DeleteKategoriPage
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DeleteKategoriPage(
+                                    kategoriName: kategoriName,
+                                    onDeleted: () {
+                                  // Callback untuk reload list setelah kategori dihapus
+                                      loadKategori();
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                           ],
                         ),
                       ),
@@ -116,11 +181,16 @@ class ReadKategori extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 40.0),
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    final hasil = await Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const CreateKategori()),
                     );
+
+                    /// ✅ TAMBAH DATA KE LIST SAAT KEMBALI
+                    if (hasil != null) {
+                      loadKategori(); // ✅ PERBAIKAN — reload dari supabase
+                    }
                   },
                   icon: const Icon(Icons.add, color: Colors.white, size: 20),
                   label: const Text(

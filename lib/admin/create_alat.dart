@@ -154,7 +154,7 @@ void dispose() {
             _buildTextField('Masukkan nama alat', _namaC),
 
             _buildLabel('Status'),
-            _buildTextField('Tersedia', _statusC),
+            _buildTextField('Masukkan status', _statusC),
 
             _buildLabel('Stok'),
             _buildTextField('0', _stokC),

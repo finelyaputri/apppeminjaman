@@ -2,8 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; 
 import 'login.dart';
 
-class LogoutPage extends StatelessWidget {
+class LogoutPage extends StatefulWidget {
   const LogoutPage({super.key});
+
+  @override
+  State<LogoutPage> createState() => _LogoutPageState();
+}
+
+class _LogoutPageState extends State<LogoutPage> {
+
+
+// ✅ PERBAIKAN — ambil user login
+  final User? currentUser = Supabase.instance.client.auth.currentUser;
+
+  // ✅ PERBAIKAN — variabel tampungan data DB
+  String nama = "-";
+  String role = "-";
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData(); // ✅ PERBAIKAN — load data saat halaman dibuka
+  }
+
+  // ✅ PERBAIKAN — ambil nama & role dari tabel berdasarkan email login
+  Future<void> loadUserData() async {
+    if (currentUser == null) return;
+
+    final data = await Supabase.instance.client
+        .from('users') // ⚠️ GANTI jika nama tabel kamu beda
+        .select()
+        .eq('email', currentUser!.email!)
+        .single();
+
+    setState(() {
+      nama = data['nama'] ?? "-";
+      role = data['role'] ?? "-";
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +100,7 @@ class LogoutPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildField("finel"),
+                  _buildField(nama),
 
                   const SizedBox(height: 18),
 
@@ -76,7 +112,8 @@ class LogoutPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildField("finel@gmail.com"),
+
+                  _buildField(currentUser?.email ?? "-"),
 
                   const SizedBox(height: 18),
 
@@ -88,7 +125,8 @@ class LogoutPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildField("Admin"),
+                  // ✅ PERBAIKAN — dari DB
+                  _buildField(role),
                 ],
               ),
             ),

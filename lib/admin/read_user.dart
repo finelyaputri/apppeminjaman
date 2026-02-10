@@ -32,6 +32,7 @@ class _ReadUserState extends State<ReadUser> {
           )
         ),
         backgroundColor: const Color(0xFF756F6F),
+        automaticallyImplyLeading: false,
         elevation: 0,
       ),
       body: Column(
