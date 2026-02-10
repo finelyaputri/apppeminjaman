@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../admin/home.dart';
+import '../pages/admin/home.dart';
 import '../petugas/home_petugas.dart';
 
 class LoginScreen extends StatefulWidget {

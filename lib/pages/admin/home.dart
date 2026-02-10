@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:app_peminjaman/auth/logout.dart';
-import 'read_alat.dart';
+import 'alat/read_alat.dart';
 import 'read_user.dart';
 import 'read_kategori.dart';
 import 'log_aktivitas.dart';

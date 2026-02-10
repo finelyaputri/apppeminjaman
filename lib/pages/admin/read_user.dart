@@ -5,9 +5,9 @@ import 'update_user.dart';
 import 'delete_user.dart';
 
 import 'home.dart';
-import 'read_alat.dart';
+import 'alat/read_alat.dart';
 import 'read_kategori.dart';
-import '../auth/logout.dart';
+import '../../auth/logout.dart';
 
 class ReadUser extends StatefulWidget {
   const ReadUser({super.key});

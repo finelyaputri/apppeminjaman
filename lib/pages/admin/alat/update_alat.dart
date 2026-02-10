@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
+import '../../../models/alat_model.dart';
 
 class UpdateAlatPage extends StatefulWidget {
-  final Map<String, dynamic>? alat; // Menerima data alat jika ada
+  final Alat alat; // UBAH: Dari Map? ke Alat
 
-  const UpdateAlatPage({super.key, this.alat});
+  const UpdateAlatPage({super.key, required this.alat}); 
 
   @override
   State<UpdateAlatPage> createState() => _UpdateAlatPageState();
@@ -25,17 +26,18 @@ class _UpdateAlatPageState extends State<UpdateAlatPage> {
   @override
   void initState() {
     super.initState();
-    final alat = widget.alat;
-    _namaAlatController = TextEditingController(text: alat?['nama_alat'] ?? '');
-    _statusController = TextEditingController(text: alat?['status'] ?? 'Tersedia');
-    _stokController = TextEditingController(text: alat?['stok']?.toString() ?? '0');
+    
+    _namaAlatController = TextEditingController(text: widget.alat.nama);
+    _statusController = TextEditingController(text: widget.alat.status);
+    _stokController = TextEditingController(text: widget.alat.stok.toString());
 
-   if (alat != null) {
-      if (alat['kategori'] != null && alat['kategori'] is Map) {
-         _selectedKategori = alat['kategori']['nama_kategori'] ?? "Sepak Bola";
-      } else {
-         _selectedKategori = alat['nama_kategori'] ?? "Sepak Bola";
-      }
+   // Set kategori awal berdasarkan kategoriId dari database
+    if (widget.alat.kategoriId == 3) {
+      _selectedKategori = "Badminton";
+    } else if (widget.alat.kategoriId == 4) {
+      _selectedKategori = "Voli";
+    } else {
+      _selectedKategori = "Sepak Bola";
     }
   }
     
@@ -62,10 +64,9 @@ class _UpdateAlatPageState extends State<UpdateAlatPage> {
 
   Future<void> _updateAlat() async {
     final supabase = Supabase.instance.client;
-    final alatId = widget.alat?['alat_id'];
-    if (alatId == null) return;
-
-    String gambarUrl = widget.alat?['gambar'] ?? 'assets/default.png';
+    
+    // Gunakan URL gambar lama sebagai default
+    String gambarUrl = widget.alat.gambar;
 
     try {
       // Upload gambar baru jika ada
@@ -86,7 +87,7 @@ class _UpdateAlatPageState extends State<UpdateAlatPage> {
         'stok': int.tryParse(_stokController.text) ?? 0,
        'kategori_id': kategoriId,
         'gambar': gambarUrl,
-      }).eq('alat_id', alatId);
+      }).eq('alat_id', widget.alat.id!);
 
       if (!mounted) return;
       Navigator.pop(context, true); // Kirim signal ke ReadAlatPage untuk refresh
@@ -100,10 +101,6 @@ class _UpdateAlatPageState extends State<UpdateAlatPage> {
 
   @override
   Widget build(BuildContext context) {
-    String currentImage = _webImage != null
-        ? '' // Akan ditampilkan Image.memory nanti
-        : widget.alat?['gambar'] ?? 'assets/default.png';
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -140,10 +137,12 @@ class _UpdateAlatPageState extends State<UpdateAlatPage> {
                     border: Border.all(color: Colors.grey.shade400),
                   ),
                   child: _webImage != null
-                      ? Image.memory(_webImage!, fit: BoxFit.contain)
-                      : (currentImage.startsWith('http')
-                          ? Image.network(currentImage, fit: BoxFit.contain)
-                          : Image.asset(currentImage, fit: BoxFit.contain)),
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.memory(_webImage!, fit: BoxFit.contain))
+                      : (widget.alat.gambar.startsWith('http')
+                          ? Image.network(widget.alat.gambar, fit: BoxFit.contain)
+                          : Image.asset(widget.alat.gambar, fit: BoxFit.contain)),
                 ),
               ),
             ),
@@ -182,7 +181,7 @@ class _UpdateAlatPageState extends State<UpdateAlatPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 100),
+            const SizedBox(height: 40),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -198,13 +197,14 @@ class _UpdateAlatPageState extends State<UpdateAlatPage> {
                   ),
                 ),
                 const SizedBox(width: 20),
-                SizedBox(
-                  width: 180,
+                const SizedBox(width: 20),
+                Expanded(
                   child: ElevatedButton(
                     onPressed: _updateAlat,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _headerColor,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
                     ),
                     child: const Text('Simpan Perubahan', style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
@@ -230,9 +230,7 @@ class _UpdateAlatPageState extends State<UpdateAlatPage> {
             contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade400)),
             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade400)),
-            hintStyle: const TextStyle(color: Colors.grey),
           ),
-          style: const TextStyle(color: Colors.grey),
         ),
       ],
     );
