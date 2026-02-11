@@ -32,12 +32,12 @@ class _UpdateAlatPageState extends State<UpdateAlatPage> {
     _stokController = TextEditingController(text: widget.alat.stok.toString());
 
    // Set kategori awal berdasarkan kategoriId dari database
-    if (widget.alat.kategoriId == 3) {
+    if (widget.alat.kategoriId == 1) {
+      _selectedKategori = "Sepak Bola";
+    } else if (widget.alat.kategoriId == 3) {
       _selectedKategori = "Badminton";
     } else if (widget.alat.kategoriId == 4) {
       _selectedKategori = "Voli";
-    } else {
-      _selectedKategori = "Sepak Bola";
     }
   }
     

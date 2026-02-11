@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; 
 import 'login.dart';
 import '../pages/peminjam/home_peminjam.dart';
+import '../pages/petugas/home_petugas.dart';
+import '../pages/admin/home.dart';
 
 class LogoutPage extends StatefulWidget {
   const LogoutPage({super.key});
@@ -144,11 +146,32 @@ class _LogoutPageState extends State<LogoutPage> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const HomePeminjam()),
-                        );
+                        final r = role.toLowerCase();
+
+                        if (r == 'admin') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const HomeDashboardAdmin()),
+                          );
+
+                        } else if (r == 'petugas') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const HomePetugas()),
+                          );
+
+                        } else if (r == 'peminjam') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const HomePeminjam()),
+                          );
+
+                        } else {
+                          // fallback kalau role tidak terbaca
+                          Navigator.pop(context);
+                        }
                       },
+
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         side: BorderSide(color: Colors.grey.shade600),

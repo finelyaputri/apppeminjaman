@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart'; // Import untuk kIsWeb
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-//// === PERBAIKAN === (WAJIB untuk Uint8List)
 import 'dart:typed_data';
 
 
@@ -16,7 +14,6 @@ class CreateProdukPage extends StatefulWidget {
 
 class _CreateProdukPageState extends State<CreateProdukPage> {
 
-//// ===== TAMBAHAN =====
 final _namaC = TextEditingController();
 final _statusC = TextEditingController();
 final _stokC = TextEditingController();
@@ -40,7 +37,7 @@ Future<void> _simpanAlat() async {
   try {
     final supabase = Supabase.instance.client;
 
-    // ===== PERBAIKAN UTAMA: Upload gambar jika ada
+    // Upload gambar jika ada
     String gambarUrl = 'assets/default.png'; // default jika tidak pilih gambar
 
     if (_webImage != null) {
@@ -79,7 +76,6 @@ Future<void> _simpanAlat() async {
 }
 
 
-//// === PERBAIKAN (aman, tidak ubah struktur UI) ===
 @override
 void dispose() {
   _namaC.dispose();
@@ -195,7 +191,7 @@ void dispose() {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
 
-                //// === PERBAIKAN ===
+                //// PERBAIKAN
                 /// BATAL → hanya kembali
                 OutlinedButton(
                   onPressed: () => Navigator.pop(context),
@@ -209,28 +205,26 @@ void dispose() {
 
                 const SizedBox(width: 10),
 
-                //// === PERBAIKAN ===
                 /// TAMBAH → simpan ke Supabase
                 ElevatedButton(
-  onPressed: () {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) {
-      // Kalau belum login, tampilkan pesan
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan login terlebih dahulu')),
-      );
-      return; // hentikan proses
-    }
-    _simpanAlat(); // Kalau sudah login, lanjut simpan
-  },
-  style: ElevatedButton.styleFrom(
-    backgroundColor: const Color(0xFF756D6D),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-  ),
-  child: const Text('Tambah Alat', style: TextStyle(color: Colors.white)),
-),
-
+                  onPressed: () {
+                    final user = Supabase.instance.client.auth.currentUser;
+                    if (user == null) {
+                      // Kalau belum login, tampilkan pesan
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Silakan login terlebih dahulu')),
+                      );
+                      return; // hentikan proses
+                    }
+                    _simpanAlat(); // Kalau sudah login, lanjut simpan
+                  },
+                  style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF756D6D),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                ),
+                child: const Text('Tambah Alat', style: TextStyle(color: Colors.white)),
+                ),
               ],
             ),
           ],

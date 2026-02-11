@@ -113,7 +113,8 @@ class _CreateUserState extends State<CreateUser> {
         await Supabase.instance.client
             .from('users')
             .update({'nama': nama, 'role': selectedRole})
-            .eq('user_id', res.user!.id); // pastikan 'id' sesuai pk tabel users
+            .eq('user_id', res.user!.id)
+            .select();
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

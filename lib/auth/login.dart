@@ -22,9 +22,9 @@ class _LoginScreenState extends State<LoginScreen> {
   String? emailError;
   String? passwordError;
 
-  // ============================
-  // 🔧 LOGIN (SUDAH DIPERBAIKI)
-  // ============================
+  
+  // LOGIN (SUDAH DIPERBAIKI)
+  
   Future<void> login() async {
     setState(() {
       emailError = null;
@@ -36,11 +36,11 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => isLoading = true);
 
     try {
-      // ✅ PERBAIKAN — ambil email & password
+      // PERBAIKAN — ambil email & password
       final email = emailController.text.trim();
       final password = passwordController.text.trim();
 
-      // ✅ PERBAIKAN — cek dulu email ada di tabel users atau tidak
+      // PERBAIKAN — cek dulu email ada di tabel users atau tidak
       final checkEmail = await Supabase.instance.client
           .from('users')
           .select('user_id')
@@ -55,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // LOGIN AUTH (kode kamu — tetap)
+      
       final response =
           await Supabase.instance.client.auth.signInWithPassword(
         email: email,
@@ -85,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final role = userData['role'] as String?;
 
         if (role == 'admin') {
-          // ✅ PERBAIKAN — beri tanda justLoggedIn: true
+         
           Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -98,9 +98,10 @@ class _LoginScreenState extends State<LoginScreen> {
             MaterialPageRoute(builder: (_) => const HomePetugas()),
           );
 
-          // ✅ PERBAIKAN — validasi login petugas
+          // PERBAIKAN — validasi login petugas
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Berhasil login sebagai Petugas')),
+            const SnackBar(
+              content: Text('Berhasil login sebagai Petugas')),
           );
 
         } else if (role == 'peminjam') {
@@ -120,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
 
-    // ✅ PERBAIKAN — auth gagal = password salah
+    // auth gagal = password salah
     } on AuthException {
       setState(() {
         passwordError = "Kata sandi salah";

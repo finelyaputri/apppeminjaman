@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../auth/logout.dart'; // Pastikan path ini benar sesuai struktur folder kamu
+import '../../auth/logout.dart'; 
+import 'alat.dart';
 
 class HomePeminjam extends StatefulWidget {
   const HomePeminjam({super.key});
@@ -11,13 +12,13 @@ class HomePeminjam extends StatefulWidget {
 class _HomePeminjamState extends State<HomePeminjam> {
   int _currentIndex = 0;
 
-  // --- DAFTAR HALAMAN ---
+  // DAFTAR HALAMAN
   // Halaman akan berganti sesuai index BottomNavigationBar
   final List<Widget> _pages = [
     const DashboardContent(), // Index 0: Tampilan kartu 'Lihat Alat'
     const Center(child: Text("Halaman Peminjaman")),
     const Center(child: Text("Halaman Pengembalian")),
-    const LogoutPage(),      // Index 3: Tampilan Profil & Tombol Logout
+    const LogoutPage(),     
   ];
 
   @override
@@ -128,7 +129,10 @@ class DashboardContent extends StatelessWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(25),
                 onTap: () {
-                  // Navigasi ke halaman Lihat Alat kamu di sini
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AlatPage()),
+                  );
                 },
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 30.0),

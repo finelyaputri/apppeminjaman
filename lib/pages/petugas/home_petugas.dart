@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../auth/logout.dart';
+import 'menyetujui_peminjaman.dart';
 
 class HomePetugas extends StatefulWidget {
-  const HomePetugas({super.key});
+  final bool justLoggedIn; // ✅ perbaikan: menandai baru login
+
+  const HomePetugas({super.key, this.justLoggedIn = false}); // default false
+
 
   @override
   State<HomePetugas> createState() => _HomePetugasState();
@@ -13,15 +17,19 @@ class _HomePetugasState extends State<HomePetugas> {
   void initState() {
     super.initState();
 
-    // ✅ Menampilkan SnackBar "Berhasil login sebagai petugas"
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Berhasil login sebagai petugas'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    });
+    if (widget.justLoggedIn) { // ✅ hanya tampilkan jika baru login
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Berhasil login sebagai admin',
+              textAlign: TextAlign.center,
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      });
+    }
   }
 
   @override
@@ -128,22 +136,37 @@ class _HomePetugasState extends State<HomePetugas> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-                if (badgeCount != null) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(color: Color(0xFFFDB851), shape: BoxShape.circle),
-                    child: Text(badgeCount, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                  ),
+          // Header Card dengan Navigasi
+          GestureDetector(
+            behavior: HitTestBehavior.opaque, // <--- TAMBAHKAN BARIS INI
+            onTap: () {
+              print("Judul yang diklik: $title"); // Cek di Debug Console
+              if (title == 'Peminjaman Masuk') { // Samakan persis dengan judul di body
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MenyetujuiPeminjaman()),
+              );
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+                  if (badgeCount != null) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(color: Color(0xFFFDB851), shape: BoxShape.circle),
+                      child: Text(badgeCount, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                  const Spacer(), // Dorong ikon ke ujung kanan
+                  const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black54),
                 ],
-              ],
+              ),
             ),
-          ),
+          ), // ✅ Kurung tutup GestureDetector dipindah ke sini agar membungkus seluruh Row
           const Divider(height: 1),
           Padding(padding: const EdgeInsets.all(12.0), child: child),
         ],

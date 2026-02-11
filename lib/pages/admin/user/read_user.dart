@@ -194,6 +194,7 @@ class _ReadUserState extends State<ReadUser> {
                     context,
                     MaterialPageRoute(builder: (context) => const CreateUser()),
                   );
+                  setState(() {}); 
                 },
                 icon: const Icon(Icons.add, color: Colors.white),
                 label: const Text(

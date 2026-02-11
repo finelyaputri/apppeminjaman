@@ -5,12 +5,12 @@ import 'user/read_user.dart';
 import 'kategori/read_kategori.dart';
 import 'log_aktivitas.dart';
 import 'crud_peminjaman.dart';
+import 'pengembalian.dart';
 
 class HomeDashboardAdmin extends StatefulWidget {
-  final bool justLoggedIn; // ✅ perbaikan: menandai baru login
+  final bool justLoggedIn; // menandai baru login
 
-  const HomeDashboardAdmin({super.key, this.justLoggedIn = false}); // default false
-
+  const HomeDashboardAdmin({super.key, this.justLoggedIn = false}); 
   @override
   State<HomeDashboardAdmin> createState() => _HomeDashboardAdminState();
 }
@@ -18,14 +18,13 @@ class HomeDashboardAdmin extends StatefulWidget {
 class _HomeDashboardAdminState extends State<HomeDashboardAdmin> {
   int _currentIndex = 0;
 
-  // ============================
-  // 🔧 PERBAIKAN initState SnackBar
-  // ============================
+  
+  // PERBAIKAN initState SnackBar
   @override
   void initState() {
     super.initState();
 
-    if (widget.justLoggedIn) { // ✅ hanya tampilkan jika baru login
+    if (widget.justLoggedIn) { // hanya tampilkan jika baru login
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -65,6 +64,24 @@ class _HomeDashboardAdminState extends State<HomeDashboardAdmin> {
               children: [
                 _infoCard('Total Alat', '20'),
                 _infoCard('Total User', '20'),
+              ],
+            ),
+            const SizedBox(height:20),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _infoCard('Total Alat', '20'),
+                _infoCard('Total User', '20'),
+              ],
+            ),
+
+             const SizedBox(height:20),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _infoCard('Total Alat', '20'),
                 _infoCard('Total User', '20'),
               ],
             ),
@@ -121,7 +138,16 @@ class _HomeDashboardAdminState extends State<HomeDashboardAdmin> {
               child: _menuButton('CRUD Data Peminjaman'),
     ),
             const SizedBox(height: 12),
-            _menuButton('CRUD Pengembalian'),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Pengembalian()),
+                  );
+                },
+            child: _menuButton('CRUD Pengembalian'),
+            ),
+
             const SizedBox(height: 12),
 
             GestureDetector(
@@ -183,7 +209,7 @@ class _HomeDashboardAdminState extends State<HomeDashboardAdmin> {
         unselectedItemColor: Colors.grey,
         onTap: (index) {
           setState(() {
-            _currentIndex = index; // ✅ Update index
+            _currentIndex = index; 
           });
 
         
@@ -209,7 +235,7 @@ class _HomeDashboardAdminState extends State<HomeDashboardAdmin> {
             );
           }
 
-    else if (index == 4) {
+          else if (index == 4) {
             // Logout
             Navigator.push(
               context,
@@ -243,7 +269,6 @@ class _HomeDashboardAdminState extends State<HomeDashboardAdmin> {
     );
   }
 
-  /// ===== WIDGETS =====
 
   Widget _infoCard(String title, String value) {
     return Expanded(
